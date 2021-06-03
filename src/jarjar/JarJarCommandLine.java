@@ -10,6 +10,7 @@ import ox.x.XList;
 public class JarJarCommandLine {
 
   private void run(Json json) {
+    json.log();
     File.temp(temp -> {
       JarJar.project(File.ofPath(json.get("project"))).main(json.get("main")).build(temp);
       uploadToSignedUrl(json.getJson("signedUrl"), "application/java-archive", temp.inputStream());
