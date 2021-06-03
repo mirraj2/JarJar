@@ -23,6 +23,7 @@ public class JarJar {
   private String mainClass = "";
   private File outputFile;
   private XSet<File> compiledProjects = XSet.create();
+  private boolean verbose = false;
 
   private JarJar(File projectDir) {
     this.projectDir = checkNotNull(projectDir);
@@ -56,7 +57,9 @@ public class JarJar {
             classpathEntry.walkTree(file -> {
               if (!file.isDirectory()) {
                 String name = file.getRelativePath(classpathEntry);
-                Log.debug(name);
+                if (verbose) {
+                  Log.debug(name);
+                }
                 zipper.putNextEntry(name, file.inputStream());
               }
             });
@@ -100,7 +103,9 @@ public class JarJar {
           unzipper.next();
           continue;
         }
-        // Log.debug(fileName);
+        if (verbose) {
+          Log.debug(fileName);
+        }
         zipper.putNextEntry(fileName, unzipper);
       }
     } finally {
@@ -154,9 +159,9 @@ public class JarJar {
       exportedClasspath.add(binDir);
 
       if (compiledProjects.add(projectDir)) {
-        // JavaCompiler.target(binDir)
-        // .classpath(myClasspath)
-        // .compile(srcPaths);
+        JavaCompiler.target(binDir)
+            .classpath(myClasspath)
+            .compile(srcPaths);
       }
     }
 
@@ -180,9 +185,9 @@ public class JarJar {
   }
 
   public static void main(String[] args) {
-    JarJar.project(File.home("workspace/ender/ender.com"))
-        .main("ender.EnderServer")
-        .build(File.downloads("temp/EnderServer.jar"));
+    JarJar.project(File.home("workspace/JarJar"))
+        .main("jarjar.JarJarCommandLine")
+        .build(File.home("workspace/JarJar/dist/JarJar.jar"));
     Log.debug("Done");
   }
 
