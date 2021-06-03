@@ -1,7 +1,5 @@
 package jarjar;
 
-import java.io.InputStream;
-
 import ox.File;
 import ox.HttpRequest;
 import ox.Json;
@@ -13,12 +11,13 @@ public class JarJarCommandLine {
     json.log();
     File.temp(temp -> {
       JarJar.project(File.ofPath(json.get("project"))).main(json.get("main")).build(temp);
-      uploadToSignedUrl(json.getJson("signedUrl"), "application/java-archive", temp.inputStream());
+      uploadToSignedUrl(json.getJson("signedUrl"), "application/java-archive", temp);
     });
   }
 
-  private void uploadToSignedUrl(Json signedUrl, String contentType, InputStream inputStream) {
-    HttpRequest request = new HttpRequest(signedUrl.get("uploadUrl"), "POST");
+  private void uploadToSignedUrl(Json signedUrl, String contentType, File file) {
+    HttpRequest request = new HttpRequest(signedUrl.get("uploadUrl"), "POST")
+        .contentLength(file.length());
     XList<Json> formFields = signedUrl.getJson("formFields").asJsonArray();
     formFields.forEach(f -> {
       f.forEach((k, v) -> {
@@ -26,7 +25,7 @@ public class JarJarCommandLine {
       });
     });
     request.part("Content-Type", contentType)
-        .part("file", inputStream)
+        .part("file", file.inputStream())
         .checkStatus();
   }
 
