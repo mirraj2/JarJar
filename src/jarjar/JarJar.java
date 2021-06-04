@@ -11,7 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedHashMultimap;
 
 import ox.File;
 import ox.IO;
@@ -160,7 +160,7 @@ public class JarJar {
     });
 
     XSet<File> myClasspath = XSet.create();
-    XMultimap<File, BuildConfig> exportedClasspath = new XMultimap<>(HashMultimap.create());
+    XMultimap<File, BuildConfig> exportedClasspath = new XMultimap<>(LinkedHashMultimap.create());
 
     XList<File> srcPaths = XList.create();
 
