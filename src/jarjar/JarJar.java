@@ -44,6 +44,11 @@ public class JarJar {
     return this;
   }
 
+  public JarJar verbose() {
+    verbose = true;
+    return this;
+  }
+
   public void build(File outputFile) {
     this.outputFile = outputFile;
 
@@ -172,7 +177,6 @@ public class JarJar {
         exportedClasspath.putAll(projectExports);
         myClasspath.addAll(projectExports.keySet());
       } else {
-        // here
         File srcPath = projectDir.child(e.attr("path"));
         myClasspath.add(srcPath);
         srcPaths.add(srcPath);
@@ -191,6 +195,15 @@ public class JarJar {
       File binDir = srcPaths.get(0).sibling("bin");
       myClasspath.add(binDir);
       exportedClasspath.put(binDir, buildFile);
+
+      srcPaths.forEach(srcPath -> {
+        srcPath.walkTree(file -> {
+          if (!file.isDirectory() && !file.extension().equals("java")) {
+            File target = binDir.child(file.getRelativePath(srcPath));
+            file.copyTo(target);
+          }
+        });
+      });
 
       if (compile) {
         JavaCompiler.target(binDir)
@@ -232,6 +245,7 @@ public class JarJar {
     // JarJar.project(File.home("workspace/ender/dev.ender.com"))
     // .main("com.ender.dev.DevServer")
     // .skipCompile()
+    // // .verbose()
     // .build(File.downloads("DevServer.jar"));
     Log.debug("Done");
   }
