@@ -17,7 +17,7 @@ public class JarJarCommandLine {
 
   private void uploadToSignedUrl(Json signedUrl, String contentType, File file) {
     HttpRequest request = new HttpRequest(signedUrl.get("uploadUrl"), "POST")
-        .contentLength(file.length());
+        .contentLength(file.length() + contentType.length());
     XList<Json> formFields = signedUrl.getJson("formFields").asJsonArray();
     formFields.forEach(f -> {
       f.forEach((k, v) -> {

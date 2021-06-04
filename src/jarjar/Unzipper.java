@@ -43,6 +43,10 @@ public class Unzipper extends FilterInputStream {
     return nextEntry.isDirectory();
   }
 
+  public long getSize() {
+    return nextEntry.getSize();
+  }
+
   public void next() {
     nextEntry();
   }
