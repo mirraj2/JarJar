@@ -53,6 +53,19 @@ public class BuildConfig {
     return projectDir.getName();
   }
 
+  @Override
+  public int hashCode() {
+    return projectDir.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object that) {
+    if (!(that instanceof BuildConfig)) {
+      return false;
+    }
+    return this.projectDir.equals(((BuildConfig) that).projectDir);
+  }
+
   public static BuildConfig getForProject(File file) {
     return new BuildConfig(file);
   }

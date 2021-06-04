@@ -11,12 +11,14 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
 
 import ox.File;
 import ox.IO;
 import ox.Log;
 import ox.util.Utils;
 import ox.x.XList;
+import ox.x.XMap;
 import ox.x.XMultimap;
 import ox.x.XSet;
 
@@ -25,7 +27,7 @@ public class JarJar {
   private final File projectDir;
   private String mainClass = "";
   private File outputFile;
-  private XSet<File> seenProjects = XSet.create();
+  private XMap<File, XMultimap<File, BuildConfig>> projectCache = XMap.create();
   private boolean verbose = false, compile = true;
 
   private JarJar(File projectDir) {
@@ -144,8 +146,8 @@ public class JarJar {
   private XMultimap<File, BuildConfig> compileProject(File projectDir, int depth) {
     checkState(projectDir.isDirectory());
 
-    if (!seenProjects.add(projectDir)) {
-      return XMultimap.create();
+    if (projectCache.containsKey(projectDir)) {
+      return projectCache.get(projectDir);
     }
 
     BuildConfig buildFile = BuildConfig.getForProject(projectDir);
@@ -158,7 +160,7 @@ public class JarJar {
     });
 
     XSet<File> myClasspath = XSet.create();
-    XMultimap<File, BuildConfig> exportedClasspath = XMultimap.create();
+    XMultimap<File, BuildConfig> exportedClasspath = new XMultimap<>(HashMultimap.create());
 
     XList<File> srcPaths = XList.create();
 
@@ -196,6 +198,8 @@ public class JarJar {
             .compile(srcPaths);
       }
     }
+
+    projectCache.put(projectDir, exportedClasspath);
 
     return exportedClasspath;
   }
