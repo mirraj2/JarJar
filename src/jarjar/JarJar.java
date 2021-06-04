@@ -223,12 +223,12 @@ public class JarJar {
   }
 
   public static void main(String[] args) {
-    // buildJarJar();
+    buildJarJar();
 
-    JarJar.project(File.home("workspace/ender/dev.ender.com"))
-        .main("com.ender.dev.DevServer")
-        .skipCompile()
-        .build(File.downloads("DevServer.jar"));
+    // JarJar.project(File.home("workspace/ender/dev.ender.com"))
+    // .main("com.ender.dev.DevServer")
+    // .skipCompile()
+    // .build(File.downloads("DevServer.jar"));
     Log.debug("Done");
   }
 
