@@ -28,7 +28,7 @@ public class JarJar {
   private String mainClass = "";
   private File outputFile;
   private XMap<File, XMultimap<File, BuildConfig>> projectCache = XMap.create();
-  private boolean verbose = false, compile = true;
+  private boolean verbose = false, clean = true, compile = true;
 
   private JarJar(File projectDir) {
     this.projectDir = checkNotNull(projectDir);
@@ -41,6 +41,11 @@ public class JarJar {
 
   public JarJar skipCompile() {
     compile = false;
+    return this;
+  }
+
+  public JarJar clean(boolean clean) {
+    this.clean = clean;
     return this;
   }
 
@@ -193,6 +198,9 @@ public class JarJar {
 
     if (srcPaths.hasData()) {
       File binDir = srcPaths.get(0).sibling("bin");
+      if (clean) {
+        binDir.empty();
+      }
       myClasspath.add(binDir);
       exportedClasspath.put(binDir, buildFile);
 
@@ -236,17 +244,19 @@ public class JarJar {
   private static void buildJarJar() {
     JarJar.project(File.home("workspace/JarJar"))
         .main("jarjar.JarJarCommandLine")
+        .clean(false)
         .build(File.home("workspace/JarJar/dist/JarJar.jar"));
   }
 
   public static void main(String[] args) {
-    buildJarJar();
+     buildJarJar();
 
-    // JarJar.project(File.home("workspace/ender/dev.ender.com"))
-    // .main("com.ender.dev.DevServer")
-    // .skipCompile()
-    // // .verbose()
-    // .build(File.downloads("DevServer.jar"));
+//    JarJar.project(File.home("workspace/ender/chat.ender.com"))
+//        .main("com.ender.chat.ChatServer")
+//        .skipCompile()
+//        // .verbose()
+//        .build(File.downloads("ChatServer.jar"));
+
     Log.debug("Done");
   }
 
