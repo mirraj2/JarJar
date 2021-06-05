@@ -208,7 +208,7 @@ public class JarJar {
         srcPath.walkTree(file -> {
           if (!file.isDirectory() && !file.extension().equals("java")) {
             File target = binDir.child(file.getRelativePath(srcPath));
-            file.copyTo(target);
+            file.copyTo(target.mkdirs());
           }
         });
       });
