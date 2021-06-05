@@ -84,7 +84,7 @@ public class JarJar {
                 if (verbose || file.length() > 1_000_000) {
                   Log.debug(name + " " + formatBytes(file.length()));
                 }
-                zipper.putNextEntry(name, file.inputStream());
+                zipper.putNextEntry(name, IO.from(file).gzipInput(false).zipInput(false).asStream());
               }
             });
           } else {
@@ -249,13 +249,14 @@ public class JarJar {
   }
 
   public static void main(String[] args) {
-     buildJarJar();
+    buildJarJar();
 
-//    JarJar.project(File.home("workspace/ender/chat.ender.com"))
-//        .main("com.ender.chat.ChatServer")
+//    JarJar.project(File.home("workspace/ender/ender.com"))
+//        .main("ender.EnderServer")
 //        .skipCompile()
+//        .clean(false)
 //        // .verbose()
-//        .build(File.downloads("ChatServer.jar"));
+//        .build(File.downloads("EnderServer.jar"));
 
     Log.debug("Done");
   }
