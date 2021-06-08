@@ -133,9 +133,11 @@ public class JarJar {
       return false;
     }
     String fileName = unzipper.getName();
-    if (fileName.startsWith("META-INF")) {
+    if (fileName.startsWith("META-INF/LICENSE") || fileName.startsWith("META-INF/NOTICE")
+        || fileName.equals("META-INF/MANIFEST.MF")) {
       return false;
     }
+    // Log.debug("Skipping: " + fileName);
     if (!config.shouldInclude(jarFile, fileName)) {
       Log.debug("Skipping non-whitelisted file: " + fileName);
       return false;
@@ -251,12 +253,12 @@ public class JarJar {
   public static void main(String[] args) {
     buildJarJar();
 
-//    JarJar.project(File.home("workspace/ender/ender.com"))
-//        .main("ender.EnderServer")
-//        .skipCompile()
-//        .clean(false)
-//        // .verbose()
-//        .build(File.downloads("EnderServer.jar"));
+    // JarJar.project(File.home("workspace/ender/ender.com"))
+    // .main("ender.EnderServer")
+    // .skipCompile()
+    // .clean(false)
+    // // .verbose()
+    // .build(File.downloads("EnderServer.jar"));
 
     Log.debug("Done");
   }
