@@ -68,7 +68,7 @@ public class JarJar {
 
   private void exportJar(XMultimap<File, BuildConfig> classpath) {
     Zipper zipper = new Zipper(outputFile);
-    XSet<String> exportedFiles = XSet.create();
+    XMultimap<String, File> exportedFiles = XMultimap.create();
     try {
       classpath.asMap().forEach((classpathEntry, buildConfigs) -> {
         try {
@@ -83,6 +83,12 @@ public class JarJar {
                 }
                 if (verbose || file.length() > 1_000_000) {
                   Log.debug(name + " " + formatBytes(file.length()));
+                }
+                exportedFiles.put(name, file);
+                XList<File> files = exportedFiles.get(name);
+                if (files.size() > 1) {
+                  Log.warn("Duplicate file: " + name + " in: " + files);
+                  return;
                 }
                 zipper.putNextEntry(name, IO.from(file).gzipInput(false).zipInput(false).asStream());
               }
@@ -108,7 +114,11 @@ public class JarJar {
     zipper.putNextEntry("META-INF/MANIFEST.MF", IO.from(sb.toString()).asStream());
   }
 
-  private void copyJarToJar(File sourceFile, Zipper zipper, XSet<String> exportedFiles, BuildConfig config) {
+  private void copyJarToJar(File sourceFile, Zipper zipper, XMultimap<String, File> exportedFiles, BuildConfig config) {
+    if (!config.shouldInclude(sourceFile.getName())) {
+      Log.warn("Skipping jar: " + sourceFile);
+      return;
+    }
     Log.debug("Copying jar: %s (%s)", sourceFile, Utils.formatBytes(sourceFile.length()));
     Unzipper unzipper = new Unzipper(IO.from(sourceFile).asStream());
     try {
@@ -128,7 +138,8 @@ public class JarJar {
     }
   }
 
-  private boolean shouldCopyFile(File jarFile, Unzipper unzipper, XSet<String> exportedFiles, BuildConfig config) {
+  private boolean shouldCopyFile(File jarFile, Unzipper unzipper, XMultimap<String, File> exportedFiles,
+      BuildConfig config) {
     if (unzipper.isDirectory()) {
       return false;
     }
@@ -142,9 +153,11 @@ public class JarJar {
       Log.debug("Skipping non-whitelisted file: " + fileName);
       return false;
     }
-    if (!exportedFiles.add(fileName)) {
+    exportedFiles.put(fileName, jarFile);
+    XList<File> jars = exportedFiles.get(fileName);
+    if (jars.size() > 1) {
       if (!fileName.equals("module-info.class")) {
-        Log.warn("Duplicate file: " + fileName);
+        Log.warn("Duplicate file: " + fileName + " in jars: " + jars);
       }
       return false;
     }
@@ -253,12 +266,12 @@ public class JarJar {
   public static void main(String[] args) {
     buildJarJar();
 
-    // JarJar.project(File.home("workspace/ender/ender.com"))
-    // .main("ender.EnderServer")
+    // JarJar.project(File.home("workspace/ender/gremlin.ender.com"))
+    // .main("gremlin.GremlinServer")
     // .skipCompile()
     // .clean(false)
     // // .verbose()
-    // .build(File.downloads("EnderServer.jar"));
+    // .build(File.downloads("GremlinServer.jar"));
 
     Log.debug("Done");
   }
