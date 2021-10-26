@@ -163,7 +163,7 @@ public class JarJar {
     }
     String fileName = unzipper.getName();
     if (fileName.startsWith("META-INF/LICENSE") || fileName.startsWith("META-INF/NOTICE")
-        || fileName.equals("META-INF/MANIFEST.MF")) {
+        || fileName.startsWith("META-INF/versions") || fileName.equals("META-INF/MANIFEST.MF")) {
       return false;
     }
     // Log.debug("Skipping: " + fileName);
