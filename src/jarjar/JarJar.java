@@ -267,7 +267,7 @@ public class JarJar {
   }
 
   public static void main(String[] args) {
-    // buildJarJar();
+    buildJarJar();
 
     // JarJar.project(File.home("workspace/bowser"))
     // .skipCompile().verbose()
