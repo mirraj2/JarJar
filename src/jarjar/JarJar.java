@@ -3,6 +3,7 @@ package jarjar;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static ox.util.Utils.formatBytes;
+import static ox.util.Utils.normalize;
 import static ox.util.Utils.only;
 import static ox.util.Utils.propagate;
 
@@ -35,12 +36,13 @@ public class JarJar {
   }
 
   public JarJar main(String mainClass) {
-    this.mainClass = mainClass;
+    this.mainClass = normalize(mainClass);
     return this;
   }
 
   public JarJar skipCompile() {
     compile = false;
+    clean = false;
     return this;
   }
 
@@ -169,6 +171,7 @@ public class JarJar {
    * Returns the classpath for this project.
    */
   private XMultimap<File, BuildConfig> compileProject(File projectDir, int depth) {
+    checkState(projectDir.exists(), "Could not find dir: " + projectDir);
     checkState(projectDir.isDirectory());
 
     if (projectCache.containsKey(projectDir)) {
@@ -264,7 +267,15 @@ public class JarJar {
   }
 
   public static void main(String[] args) {
-    buildJarJar();
+    // buildJarJar();
+
+    // JarJar.project(File.home("workspace/bowser"))
+    // .skipCompile().verbose()
+    // .build(File.downloads("bowser.jar"));
+    //
+    // JarJar.project(File.home("workspace/EZDB"))
+    // .skipCompile().verbose()
+    // .build(File.downloads("ezdb.jar"));
 
     // JarJar.project(File.home("workspace/ender/gremlin.ender.com"))
     // .main("gremlin.GremlinServer")
