@@ -8,7 +8,12 @@ public class JarJarCommandLine {
 
   private void run(Json json) {
     json.log();
-    XList<String> projects = json.getJson("projects").asStringArray();
+    XList<String> projects;
+    if (json.hasKey("projects")) {
+      projects = json.getJson("projects").asStringArray();
+    } else {
+      projects = XList.of(json.get("project"));
+    }
     JarJar jarjar = JarJar.project(File.ofPath(projects.get(0)));
     for (String project : projects.offset(1)) {
       jarjar.addProject(File.ofPath(project));
