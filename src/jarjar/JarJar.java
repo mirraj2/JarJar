@@ -12,6 +12,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.LinkedHashMultimap;
 
 import ox.File;
@@ -25,14 +26,14 @@ import ox.x.XSet;
 
 public class JarJar {
 
-  private final File projectDir;
+  private final XList<File> projectDirs = XList.create();
   private String mainClass = "";
   private File outputFile;
   private XMap<File, XMultimap<File, BuildConfig>> projectCache = XMap.create();
   private boolean verbose = false, clean = true, compile = true;
 
   private JarJar(File projectDir) {
-    this.projectDir = checkNotNull(projectDir);
+    this.projectDirs.add(checkNotNull(projectDir));
   }
 
   public JarJar main(String mainClass) {
@@ -60,7 +61,10 @@ public class JarJar {
     this.outputFile = outputFile;
 
     Stopwatch watch = Stopwatch.createStarted();
-    XMultimap<File, BuildConfig> classpath = compileProject(projectDir, 0);
+    XMultimap<File, BuildConfig> classpath = new XMultimap<>(HashMultimap.create());
+    projectDirs.forEach(projectDir -> {
+      classpath.putAll(compileProject(projectDir, 0));
+    });
     Log.debug("Compiled " + watch);
 
     watch.reset().start();
@@ -96,6 +100,7 @@ public class JarJar {
               }
             });
           } else {
+            Log.debug(classpathEntry + " :: " + buildConfigs);
             copyJarToJar(classpathEntry, zipper, exportedFiles, only(buildConfigs));
           }
         } catch (Exception e) {
@@ -244,15 +249,22 @@ public class JarJar {
   }
 
   private File findProject(String path) {
-    File ret = projectDir.parent().child(path);
-    if (ret.exists()) {
-      return ret;
-    }
-    ret = projectDir.parent().parent().child(path);
-    if (ret.exists()) {
-      return ret;
+    for (File projectDir : projectDirs) {
+      File ret = projectDir.parent().child(path);
+      if (ret.exists()) {
+        return ret;
+      }
+      ret = projectDir.parent().parent().child(path);
+      if (ret.exists()) {
+        return ret;
+      }
     }
     throw new RuntimeException("Could not find project: " + path);
+  }
+
+  public JarJar addProject(File projectDir) {
+    this.projectDirs.add(projectDir);
+    return this;
   }
 
   public static JarJar project(File projectDir) {
@@ -270,6 +282,7 @@ public class JarJar {
     buildJarJar();
 
     // JarJar.project(File.home("workspace/bowser"))
+    // .addProject(File.home("workspace/EZDB"))
     // .skipCompile().verbose()
     // .build(File.downloads("bowser.jar"));
     //

@@ -2,13 +2,18 @@ package jarjar;
 
 import ox.File;
 import ox.Json;
+import ox.x.XList;
 
 public class JarJarCommandLine {
 
   private void run(Json json) {
     json.log();
-    JarJar jarjar = JarJar.project(File.ofPath(json.get("project")))
-        .main(json.get("main"));
+    XList<String> projects = json.getJson("projects").asStringArray();
+    JarJar jarjar = JarJar.project(File.ofPath(projects.get(0)));
+    for (String project : projects.offset(1)) {
+      jarjar.addProject(File.ofPath(project));
+    }
+    jarjar.main(json.get("main"));
     if (json.getBoolean("skipCompile", false)) {
       jarjar = jarjar.skipCompile();
     }
