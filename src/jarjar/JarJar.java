@@ -31,6 +31,7 @@ public class JarJar {
   private File outputFile;
   private XMap<File, XMultimap<File, BuildConfig>> projectCache = XMap.create();
   private boolean verbose = false, clean = true, compile = true;
+  private XSet<String> blacklist = XSet.create();
 
   private JarJar(File projectDir) {
     this.projectDirs.add(checkNotNull(projectDir));
@@ -199,6 +200,11 @@ public class JarJar {
 
     for (Element e : classpathEntries.get("src")) {
       if (e.hasAttr("combineaccessrules")) {
+        if (blacklist.contains(e.attr("path"))) {
+          Log.debug("Blacklisted: " + e);
+          continue;
+        }
+
         // recursively compile this other project
         File dir = findProject(e.attr("path"));
         XMultimap<File, BuildConfig> projectExports = compileProject(dir, depth + 1);
@@ -267,6 +273,11 @@ public class JarJar {
     return this;
   }
 
+  public JarJar blacklist(String s) {
+    this.blacklist.add(s);
+    return this;
+  }
+
   public static JarJar project(File projectDir) {
     return new JarJar(projectDir);
   }
@@ -282,10 +293,10 @@ public class JarJar {
     buildJarJar();
 
     // JarJar.project(File.home("workspace/bowser"))
-    // .addProject(File.home("workspace/EZDB"))
-    // .skipCompile().verbose()
+    // .skipCompile()
+    // .blacklist("/ox")
     // .build(File.downloads("bowser.jar"));
-    //
+
     // JarJar.project(File.home("workspace/EZDB"))
     // .skipCompile().verbose()
     // .build(File.downloads("ezdb.jar"));

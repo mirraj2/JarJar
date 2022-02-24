@@ -13,6 +13,9 @@ public class JarJarCommandLine {
     for (String project : projects.offset(1)) {
       jarjar.addProject(File.ofPath(project));
     }
+    if (json.hasKey("blacklist")) {
+      json.getJson("blacklist").asStringArray().forEach(jarjar::blacklist);
+    }
     jarjar.main(json.get("main"));
     if (json.getBoolean("skipCompile", false)) {
       jarjar = jarjar.skipCompile();
