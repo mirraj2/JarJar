@@ -18,6 +18,8 @@ public class BuildConfig {
   }
 
   public boolean shouldInclude(String fileName) {
+    // Log.debug(projectDir + " --> " + fileName);
+
     if (json.hasKey("exclude")) {
       for (String s : json.getJson("exclude").asStringArray()) {
         if (fileName.startsWith(s)) {
@@ -25,6 +27,17 @@ public class BuildConfig {
         }
       }
     }
+
+    if (json.hasKey("include")) {
+      XList<String> whitelist = json.getJson("include").asStringArray();
+      for (String s : whitelist) {
+        if (fileName.startsWith(s)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     return true;
   }
 

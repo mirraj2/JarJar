@@ -80,12 +80,16 @@ public class JarJar {
       classpath.asMap().forEach((classpathEntry, buildConfigs) -> {
         try {
           if (classpathEntry.isDirectory()) {
-            Log.debug("Copying tree: %s (%s)", classpathEntry, formatBytes(classpathEntry.totalSize()));
+            if (verbose) {
+              Log.debug("Copying tree: %s (%s)", classpathEntry, formatBytes(classpathEntry.totalSize()));
+            }
             classpathEntry.walkTree(file -> {
               if (!file.isDirectory()) {
                 String name = file.getRelativePath(classpathEntry);
                 if (!only(buildConfigs).shouldInclude(name)) {
-                  Log.warn("Skipping " + name);
+                  if (verbose) {
+                    Log.warn("Skipping " + name);
+                  }
                   return;
                 }
                 if (verbose || file.length() > 1_000_000) {
@@ -101,7 +105,9 @@ public class JarJar {
               }
             });
           } else {
-            Log.debug(classpathEntry + " :: " + buildConfigs);
+            if (verbose) {
+              Log.debug(classpathEntry + " :: " + buildConfigs);
+            }
             copyJarToJar(classpathEntry, zipper, exportedFiles, only(buildConfigs));
           }
         } catch (Exception e) {
@@ -124,10 +130,14 @@ public class JarJar {
 
   private void copyJarToJar(File sourceFile, Zipper zipper, XMultimap<String, File> exportedFiles, BuildConfig config) {
     if (!config.shouldInclude(sourceFile.getName())) {
-      Log.warn("Skipping jar: " + sourceFile);
+      if (verbose) {
+        Log.warn("Skipping jar: " + sourceFile);
+      }
       return;
     }
-    Log.debug("Copying jar: %s (%s)", sourceFile, Utils.formatBytes(sourceFile.length()));
+    if (verbose) {
+      Log.debug("Copying jar: %s (%s)", sourceFile, Utils.formatBytes(sourceFile.length()));
+    }
     Unzipper unzipper = new Unzipper(IO.from(sourceFile).asStream());
     try {
       while (unzipper.hasNext()) {
