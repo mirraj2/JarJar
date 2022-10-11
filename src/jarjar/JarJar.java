@@ -30,7 +30,7 @@ public class JarJar {
   private String mainClass = "";
   private File outputFile;
   private XMap<File, XMultimap<File, BuildConfig>> projectCache = XMap.create();
-  private boolean verbose = false, clean = true, compile = true;
+  private boolean verbose = false, clean = true, compile = true, multiRelease = true; 
   private XSet<String> blacklist = XSet.create();
 
   private JarJar(File projectDir) {
@@ -39,6 +39,11 @@ public class JarJar {
 
   public JarJar main(String mainClass) {
     this.mainClass = normalize(mainClass);
+    return this;
+  }
+
+  public JarJar multiRelease(boolean multiRelease) {
+    this.multiRelease = multiRelease;
     return this;
   }
 
@@ -163,7 +168,7 @@ public class JarJar {
     }
     String fileName = unzipper.getName();
     if (fileName.startsWith("META-INF/LICENSE") || fileName.startsWith("META-INF/NOTICE")
-        || fileName.equals("META-INF/MANIFEST.MF")) {
+        || (!multiRelease && fileName.startsWith("META-INF/versions")) || fileName.equals("META-INF/MANIFEST.MF")) {
       return false;
     }
     // Log.debug("Skipping: " + fileName);

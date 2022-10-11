@@ -25,7 +25,8 @@ public class JarJarCommandLine {
     if (json.getBoolean("skipCompile", false)) {
       jarjar = jarjar.skipCompile();
     }
-    jarjar.build(File.ofPath(json.get("target")));
+    jarjar.multiRelease(json.getBoolean("multiRelease", true))
+      .build(File.ofPath(json.get("target")));
   }
 
   public static void main(String[] args) {
