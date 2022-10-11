@@ -28,7 +28,7 @@ public class JarJar {
 
   private final XList<File> projectDirs = XList.create();
   private String mainClass = "";
-  private File outputFile;
+  private XList<File> outputFiles;
   private XMap<File, XMultimap<File, BuildConfig>> projectCache = XMap.create();
   private boolean verbose = false, clean = true, compile = true, multiRelease = true; 
   private XSet<String> blacklist = XSet.create();
@@ -64,7 +64,11 @@ public class JarJar {
   }
 
   public void build(File outputFile) {
-    this.outputFile = outputFile;
+    build(XList.of(outputFile));
+  }
+
+  public void build(XList<File> outputFiles) {
+    this.outputFiles = outputFiles;
 
     Stopwatch watch = Stopwatch.createStarted();
     XMultimap<File, BuildConfig> classpath = new XMultimap<>(HashMultimap.create());
@@ -75,11 +79,18 @@ public class JarJar {
 
     watch.reset().start();
     exportJar(classpath);
-    Log.debug("JAR created: %s %s (%s)", outputFile, watch, Utils.formatBytes(outputFile.length()));
+
+    for (int i = 0; i < outputFiles.size(); i++) {
+      File outputFile = outputFiles.get(i);
+      if (i > 0) {
+        outputFiles.get(0).copyTo(outputFile);
+      }
+      Log.debug("JAR created: %s %s (%s)", outputFile, watch, Utils.formatBytes(outputFile.length()));
+    }
   }
 
   private void exportJar(XMultimap<File, BuildConfig> classpath) {
-    Zipper zipper = new Zipper(outputFile);
+    Zipper zipper = new Zipper(outputFiles.get(0));
     XMultimap<String, File> exportedFiles = XMultimap.create();
     try {
       classpath.asMap().forEach((classpathEntry, buildConfigs) -> {
