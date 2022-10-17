@@ -185,7 +185,9 @@ public class JarJar {
     // return false;
     // }
     if (fileName.startsWith("META-INF/")) {
-      Log.debug("Skipping file: " + fileName);
+      if (verbose) {
+        Log.debug("Skipping file: " + fileName);
+      }
       return false;
     }
 
