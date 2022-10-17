@@ -180,18 +180,13 @@ public class JarJar {
       return false;
     }
     String fileName = entry.getName();
-    // if (fileName.startsWith("META-INF/LICENSE") || fileName.startsWith("META-INF/NOTICE")
-    // || (!multiRelease && fileName.startsWith("META-INF/versions")) || fileName.equals("META-INF/MANIFEST.MF")) {
-    // return false;
-    // }
-    if (fileName.startsWith("META-INF/")) {
+    if (fileName.startsWith("META-INF/") && !fileName.startsWith("META-INF/services")) {
       if (verbose) {
         Log.debug("Skipping file: " + fileName);
       }
       return false;
     }
 
-    // Log.debug("Skipping: " + fileName);
     if (!config.shouldInclude(jarFile, fileName)) {
       Log.debug("Skipping non-whitelisted file: " + fileName);
       return false;
