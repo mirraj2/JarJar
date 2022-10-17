@@ -2,62 +2,41 @@ package jarjar;
 
 import static ox.util.Utils.propagate;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.zip.ZipFile;
 
+import ox.File;
 import ox.IO;
 
-public class Unzipper extends FilterInputStream {
+public class Unzipper {
 
-  private final ZipInputStream zis;
+  private ZipFile zipFile;
 
-  private ZipEntry nextEntry = null;
-
-  public Unzipper(InputStream is) {
-    super(is instanceof ZipInputStream ? is : new ZipInputStream(is));
-
-    zis = (ZipInputStream) in;
-    nextEntry();
-  }
-
-  private void nextEntry() {
+  public Unzipper(File file) {
     try {
-      nextEntry = zis.getNextEntry();
+      zipFile = new ZipFile(file.file);
     } catch (IOException e) {
       throw propagate(e);
     }
   }
 
-  public boolean hasNext() {
-    return nextEntry != null;
+  public void forEach(Consumer<ZipEntry> callback) {
+    zipFile.stream().forEach(callback::accept);
   }
 
-  public String getName() {
-    return nextEntry.getName();
-  }
-
-  public boolean isDirectory() {
-    return nextEntry.isDirectory();
-  }
-
-  public long getSize() {
-    return nextEntry.getSize();
-  }
-
-  public void next() {
-    nextEntry();
-  }
-
-  @Override
-  public void close() throws IOException {
-    nextEntry();
+  public InputStream openStream(ZipEntry entry) {
+    try {
+      return zipFile.getInputStream(entry);
+    } catch (IOException e) {
+      throw propagate(e);
+    }
   }
 
   public void finish() {
-    IO.close(super.in);
+    IO.close(zipFile);
   }
 
 }

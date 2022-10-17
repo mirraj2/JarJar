@@ -7,6 +7,8 @@ import static ox.util.Utils.normalize;
 import static ox.util.Utils.only;
 import static ox.util.Utils.propagate;
 
+import java.util.zip.ZipEntry;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -154,34 +156,39 @@ public class JarJar {
     if (verbose) {
       Log.debug("Copying jar: %s (%s)", sourceFile, Utils.formatBytes(sourceFile.length()));
     }
-    Unzipper unzipper = new Unzipper(IO.from(sourceFile).asStream());
+
+    Unzipper unzipper = new Unzipper(sourceFile);
     try {
-      while (unzipper.hasNext()) {
-        if (!shouldCopyFile(sourceFile, unzipper, exportedFiles, config)) {
-          unzipper.next();
-          continue;
+      unzipper.forEach(entry -> {
+        if (!shouldCopyFile(sourceFile, entry, exportedFiles, config)) {
+          return;
         }
-        String fileName = unzipper.getName();
-        if (verbose || unzipper.getSize() > 1_000_000) {
-          Log.debug("%s (%s)", fileName, formatBytes(unzipper.getSize()));
+        String fileName = entry.getName();
+        if (verbose || entry.getSize() > 1_000_000) {
+          Log.debug("%s (%s)", fileName, formatBytes(entry.getSize()));
         }
-        zipper.putNextEntry(fileName, unzipper);
-      }
+        zipper.putNextEntry(fileName, unzipper.openStream(entry));
+      });
     } finally {
       unzipper.finish();
     }
   }
 
-  private boolean shouldCopyFile(File jarFile, Unzipper unzipper, XMultimap<String, File> exportedFiles,
+  private boolean shouldCopyFile(File jarFile, ZipEntry entry, XMultimap<String, File> exportedFiles,
       BuildConfig config) {
-    if (unzipper.isDirectory()) {
+    if (entry.isDirectory()) {
       return false;
     }
-    String fileName = unzipper.getName();
-    if (fileName.startsWith("META-INF/LICENSE") || fileName.startsWith("META-INF/NOTICE")
-        || (!multiRelease && fileName.startsWith("META-INF/versions")) || fileName.equals("META-INF/MANIFEST.MF")) {
+    String fileName = entry.getName();
+    // if (fileName.startsWith("META-INF/LICENSE") || fileName.startsWith("META-INF/NOTICE")
+    // || (!multiRelease && fileName.startsWith("META-INF/versions")) || fileName.equals("META-INF/MANIFEST.MF")) {
+    // return false;
+    // }
+    if (fileName.startsWith("META-INF/")) {
+      Log.debug("Skipping file: " + fileName);
       return false;
     }
+
     // Log.debug("Skipping: " + fileName);
     if (!config.shouldInclude(jarFile, fileName)) {
       Log.debug("Skipping non-whitelisted file: " + fileName);
@@ -326,6 +333,11 @@ public class JarJar {
     // JarJar.project(File.home("workspace/EZDB"))
     // .skipCompile().verbose()
     // .build(File.downloads("ezdb.jar"));
+
+    // JarJar.project(File.home("workspace/ender/talent.ender.com"))
+    // // .verbose()
+    // .main("ender.talent.TalentServer")
+    // .build(File.downloads("talent2.jar"));
 
     // JarJar.project(File.home("workspace/ender/gremlin.ender.com"))
     // .main("gremlin.GremlinServer")
