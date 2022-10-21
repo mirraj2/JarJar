@@ -331,10 +331,11 @@ public class JarJar {
     // .skipCompile().verbose()
     // .build(File.downloads("ezdb.jar"));
 
-    // JarJar.project(File.home("workspace/ender/talent.ender.com"))
+    // JarJar.project(File.home("workspace/ender/ender.com"))
     // // .verbose()
-    // .main("ender.talent.TalentServer")
-    // .build(File.downloads("talent2.jar"));
+    // .skipCompile()
+    // .main("ender.EnderServer")
+    // .build(File.downloads("EnderServer.jar"));
 
     // JarJar.project(File.home("workspace/ender/gremlin.ender.com"))
     // .main("gremlin.GremlinServer")
