@@ -33,7 +33,7 @@ public class JavaCompiler {
     targetDir.mkdirs();
 
     XList<String> command = XList.of("javac", "-d", targetDir.getPath(), "-source", "11", "-target", "11",
-        "-g:source,lines,vars");
+        "-g:source,lines,vars", "-parameters");
     if (classpath.hasData()) {
       command.add("-classpath", Joiner.on(':').join(classpath));
     }
