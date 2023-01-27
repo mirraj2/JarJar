@@ -116,7 +116,9 @@ public class JarJar {
                 exportedFiles.put(name, file);
                 XList<File> files = exportedFiles.get(name);
                 if (files.size() > 1) {
-                  Log.warn("Duplicate file: " + name + " in: " + files);
+                  if (verbose) {
+                    Log.warn("Duplicate file: " + name + " in: " + files);
+                  }
                   return;
                 }
                 zipper.putNextEntry(name, IO.from(file).gzipInput(false).zipInput(false).asStream());
@@ -195,7 +197,9 @@ public class JarJar {
     XList<File> jars = exportedFiles.get(fileName);
     if (jars.size() > 1) {
       if (!fileName.equals("module-info.class")) {
-        Log.warn("Duplicate file: " + fileName + " in jars: " + jars);
+        if (verbose) {
+          Log.warn("Duplicate file: " + fileName + " in jars: " + jars);
+        }
       }
       return false;
     }
@@ -320,7 +324,7 @@ public class JarJar {
   }
 
   public static void main(String[] args) {
-    buildJarJar();
+    // buildJarJar();
 
     // JarJar.project(File.home("workspace/bowser"))
     // .skipCompile()
@@ -331,11 +335,11 @@ public class JarJar {
     // .skipCompile().verbose()
     // .build(File.downloads("ezdb.jar"));
 
-    // JarJar.project(File.home("workspace/ender/ender.com"))
-    // // .verbose()
-    // .skipCompile()
-    // .main("ender.EnderServer")
-    // .build(File.downloads("EnderServer.jar"));
+    JarJar.project(File.home("workspace/ender/ender.com"))
+        // .verbose()
+        .skipCompile()
+        .main("ender.EnderServer")
+        .build(File.downloads("EnderServer.jar"));
 
     // JarJar.project(File.home("workspace/ender/gremlin.ender.com"))
     // .main("gremlin.GremlinServer")
