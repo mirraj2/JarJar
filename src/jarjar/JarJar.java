@@ -233,12 +233,11 @@ public class JarJar {
     XList<File> srcPaths = XList.create();
 
     for (Element e : classpathEntries.get("src")) {
+      if (blacklist.contains(e.attr("path"))) {
+        Log.debug("Blacklisted: " + e);
+        continue;
+      }
       if (e.hasAttr("combineaccessrules")) {
-        if (blacklist.contains(e.attr("path"))) {
-          Log.debug("Blacklisted: " + e);
-          continue;
-        }
-
         // recursively compile this other project
         File dir = findProject(e.attr("path"));
         XMultimap<File, BuildConfig> projectExports = compileProject(dir, depth + 1);
@@ -320,11 +319,12 @@ public class JarJar {
     JarJar.project(File.home("workspace/JarJar"))
         .main("jarjar.JarJarCommandLine")
         .clean(false)
+        .blacklist("test")
         .build(File.home("workspace/JarJar/dist/JarJar.jar"));
   }
 
   public static void main(String[] args) {
-    // buildJarJar();
+    buildJarJar();
 
     // JarJar.project(File.home("workspace/bowser"))
     // .skipCompile()
@@ -335,11 +335,11 @@ public class JarJar {
     // .skipCompile().verbose()
     // .build(File.downloads("ezdb.jar"));
 
-    JarJar.project(File.home("workspace/ender/ender.com"))
-        // .verbose()
-        .skipCompile()
-        .main("ender.EnderServer")
-        .build(File.downloads("EnderServer.jar"));
+    // JarJar.project(File.home("workspace/ender/ender.com"))
+    // // .verbose()
+    // .skipCompile()
+    // .main("ender.EnderServer")
+    // .build(File.downloads("EnderServer.jar"));
 
     // JarJar.project(File.home("workspace/ender/gremlin.ender.com"))
     // .main("gremlin.GremlinServer")
