@@ -277,6 +277,7 @@ public class JarJar {
 
       if (compile) {
         JavaCompiler.target(binDir)
+            .verbose(verbose)
             .classpath(myClasspath)
             .compile(srcPaths);
       }

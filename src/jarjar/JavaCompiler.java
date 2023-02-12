@@ -14,6 +14,7 @@ public class JavaCompiler {
 
   private final File targetDir;
   private final XList<File> classpath = XList.create();
+  private boolean verbose = false;
 
   private JavaCompiler(File targetDir) {
     this.targetDir = targetDir;
@@ -21,6 +22,11 @@ public class JavaCompiler {
 
   public JavaCompiler classpath(XSet<File> classpath) {
     this.classpath.addAll(classpath);
+    return this;
+  }
+
+  public JavaCompiler verbose(boolean verbose) {
+    this.verbose = verbose;
     return this;
   }
 
@@ -45,7 +51,9 @@ public class JavaCompiler {
     });
     command.addAll(javaFiles.map(f -> f.getPath()));
 
-    Log.debug(Joiner.on(" ").join(command));
+    if (verbose) {
+      Log.debug(Joiner.on(" ").join(command));
+    }
     try {
       Process p = new ProcessBuilder().inheritIO().command(command).start();
       int returnValue = p.waitFor();
